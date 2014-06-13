@@ -8,6 +8,10 @@
 #include <string>
 #include <cmath>
 
+#ifdef _MSC_VER
+#include "win32-math.h"
+#endif
+
 using namespace v8;
 using namespace node;
 

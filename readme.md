@@ -78,4 +78,8 @@ Then try reinstalling this module. For further information, [see this thread](ht
 
 #### Windows:
 
-N/A; pull requests are accepted!
+You will need cairo and librsvg-2 libraries which is bundled in GTK.
+Go to http://www.gtk.org/download/win64.php (or http://www.gtk.org/download/win32.php for 32-bit node)
+and download the all-in-one bundle (these instructions used the following zip http://win32builder.gnome.org/gtk+-bundle_3.6.4-20131201_win64.zip).
+Unzip the contents in C:\GTK (if you want to change this you must define -GTK_Root=c:\another\path shell variable to npm or node-gyp to reflect your changes),
+and add "C:\GTK\bin;" to the PATH environment variable in Windows, it's necessary for node-rsvg runtime to load those libs.

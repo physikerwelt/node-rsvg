@@ -1,4 +1,7 @@
 {
+	"variables": {
+		"GTK_Root%": "c:\\gtk",
+	},
 	"targets": [
 		{
 			"target_name": "rsvg",
@@ -9,13 +12,16 @@
 			],
 			"variables": {
 				"packages": "librsvg-2.0 cairo-png cairo-pdf cairo-svg",
-				"libraries": "<!(pkg-config --libs-only-l <(packages))",
-				"ldflags": "<!(pkg-config --libs-only-L --libs-only-other <(packages))",
-				"cflags": "<!(pkg-config --cflags <(packages))"
+				"conditions": [
+					[ "OS!='win'", {
+						"libraries": "<!(pkg-config --libs-only-l <(packages))",
+						"ldflags": "<!(pkg-config --libs-only-L --libs-only-other <(packages))",
+						"cflags": "<!(pkg-config --cflags <(packages))"
+					}, { # else OS!='win'
+						"include_dirs": "<!(<(python) tools/include_dirs.py <(GTK_Root) <(packages))"
+					} ]
+				]
 			},
-			"libraries": [
-				"<@(libraries)"
-			],
 			"conditions": [
 				[ "OS=='linux'", {
 					"cflags": [
@@ -23,7 +29,10 @@
 					],
 					"ldflags": [
 						"<@(ldflags)"
-					]
+					],
+					"libraries": [
+						"<@(libraries)"
+					],
 				} ],
 				[ "OS=='mac'", {
 					"xcode_settings": {
@@ -33,6 +42,38 @@
 						"OTHER_LDFLAGS": [
 							"<@(ldflags)"
 						]
+					},
+					"libraries": [
+						"<@(libraries)"
+					],
+				} ],
+				[ "OS=='win'", {
+					"sources+": [
+						"src/win32-math.cc"
+					],
+					"include_dirs": [
+						"<@(include_dirs)"
+					],
+					"libraries": [
+						'librsvg-2.dll.a',
+						'glib-2.0.lib',
+						'gobject-2.0.lib',
+						'cairo.lib'
+					],
+					"msvs_settings": {
+						'VCCLCompilerTool': {
+							'AdditionalOptions': [
+								"/EHsc"
+							]
+						}
+					},
+					"msbuild_settings": {
+						"Link": {
+							"AdditionalLibraryDirectories": [
+								"<(GTK_Root)\\lib"
+							],
+							"ImageHasSafeExceptionHandlers": "false"
+						}
 					}
 				} ]
 			]
