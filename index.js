@@ -1,6 +1,6 @@
 'use strict';
 
-var binding = require('./build/Release/rsvg');
+var binding = require('bindings')('rsvg');
 var Writable = require('stream').Writable;
 var util = require('util');
 
