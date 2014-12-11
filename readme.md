@@ -7,15 +7,16 @@
  *  SVG
  *  Raw memory buffer image
 
-[![Build Status](https://travis-ci.org/walling/node-rsvg.png?branch=master)](https://travis-ci.org/walling/node-rsvg)
+[![Build Status](https://travis-ci.org/anru/node-rsvg.png?branch=master)](https://travis-ci.org/anru/node-rsvg)
 
+This repository is fork of https://github.com/walling/node-rsvg and has windows support and don't need to export some variables for successfully building on OSX.
 
 ## Basic Usage
 
 Here is a simple example. Look in `index.js` for more documentation.
 
 ```javascript
-var Rsvg = require('rsvg').Rsvg;
+var Rsvg = require('librsvg').Rsvg;
 var fs = require('fs');
 
 // Create SVG render instance.

@@ -1,6 +1,13 @@
 {
 	"variables": {
 		"GTK_Root%": "c:\\gtk",
+		"conditions": [
+		    [ "OS == 'mac'", {
+		        "pkg_env": "PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig"
+		    }, {
+		        "pkg_env": ""
+		    }]
+		]
 	},
 	"targets": [
 		{
@@ -14,9 +21,9 @@
 				"packages": "librsvg-2.0 cairo-png cairo-pdf cairo-svg",
 				"conditions": [
 					[ "OS!='win'", {
-						"libraries": "<!(pkg-config --libs-only-l <(packages))",
-						"ldflags": "<!(pkg-config --libs-only-L --libs-only-other <(packages))",
-						"cflags": "<!(pkg-config --cflags <(packages))"
+						"libraries": "<!(<(pkg_env) pkg-config --libs-only-l <(packages))",
+						"ldflags": "<!(<(pkg_env) pkg-config --libs-only-L --libs-only-other <(packages))",
+						"cflags": "<!(<(pkg_env) pkg-config --cflags <(packages))"
 					}, { # else OS!='win'
 						"include_dirs": "<!(<(python) tools/include_dirs.py <(GTK_Root) <(packages))"
 					} ]
