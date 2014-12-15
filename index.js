@@ -267,12 +267,19 @@ Rsvg.prototype.render = function(options) {
 
 	options = options || {};
 
-	return this.handle.render(
+	var img = this.handle.render(
 		options.width,
 		options.height,
 		options.format,
 		options.id
 	);
+
+	if (this.width + this.height > 0 && img.data.length == 0) {
+		// sometimes render fails and returns zero-sized buffer, see zerobuffer test
+		// just rerender image
+		return this.render(options);
+	}
+	return img;
 };
 
 /**
