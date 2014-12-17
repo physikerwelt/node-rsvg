@@ -44,7 +44,7 @@ fs.createReadStream('tiger.svg').pipe(svg);
 First install the LibRSVG library and header files. Usually you have to look for a *development* package version. You must also have a functioning build tool chain including `pkg-config`. You can find instructions for different operating systems below. After that, you simply run:
 
 ```bash
-npm install rsvg
+npm install librsvg
 ```
 
 Library versions known to work:
