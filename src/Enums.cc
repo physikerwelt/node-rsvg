@@ -39,8 +39,11 @@ Handle<Value> RenderFormatToString(render_format_t format) {
 		format == RENDER_FORMAT_SVG ? "svg" :
 		format == RENDER_FORMAT_VIPS ? "vips" :
 		NULL;
-
-	return formatString ? String::New(formatString) : Null();
+        if (formatString) {
+                return NanNew<String>(formatString);
+        } else {
+                return NanNull();
+        }
 }
 
 cairo_format_t CairoFormatFromString(const char* formatString) {
@@ -76,6 +79,9 @@ Handle<Value> CairoFormatToString(cairo_format_t format) {
 		format == CAIRO_FORMAT_RGB30 ? "rgb30" :
 #endif
 		NULL;
-
-	return formatString ? String::New(formatString) : Null();
+        if (formatString) {
+                return NanNew<String>(formatString);
+        } else {
+                return NanNull();
+        }
 }

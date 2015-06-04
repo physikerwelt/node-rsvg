@@ -17,6 +17,9 @@
 				"src/Enums.cc",
 				"src/Autocrop.cc"
 			],
+                        "include_dirs": [
+                               "<!(node -e \"require('nan')\")" 
+                        ],
 			"variables": {
 				"packages": "librsvg-2.0 cairo-png cairo-pdf cairo-svg",
 				"conditions": [
