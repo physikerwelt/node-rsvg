@@ -100,9 +100,9 @@ static bool AutocropRecursive(RsvgHandle* handle, autocrop_region_t* region, int
 		cairo_destroy(cr);
 		cairo_surface_destroy(surface);
 
-		ThrowException(Exception::Error(String::New(
+		NanThrowError(
 			status ? cairo_status_to_string(status) : "Failed to render image."
-		)));
+		);
 		return false;
 	}
 
@@ -166,8 +166,8 @@ static bool AutocropRecursive(RsvgHandle* handle, autocrop_region_t* region, int
 	return success;
 }
 
-Handle<Value> Rsvg::Autocrop(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::Autocrop) {
+	NanScope();
 	Rsvg* obj = node::ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	RsvgDimensionData dimensions = { 0, 0, 0, 0 };
@@ -178,13 +178,14 @@ Handle<Value> Rsvg::Autocrop(const Arguments& args) {
 			AutocropRecursive(obj->_handle, &area, 2) &&
 			AutocropRecursive(obj->_handle, &area, 3) &&
 			AutocropRecursive(obj->_handle, &area, 4)) {
-		Handle<ObjectTemplate> dimensions = ObjectTemplate::New();
-		dimensions->Set("x", Number::New(area.left));
-		dimensions->Set("y", Number::New(area.top));
-		dimensions->Set("width", Number::New(area.right - area.left));
-		dimensions->Set("height", Number::New(area.bottom - area.top));
-		return scope.Close(dimensions->NewInstance());
+		Handle<ObjectTemplate> dimensions = NanNew<ObjectTemplate>();
+		dimensions->Set(NanNew("x"), NanNew<Number>(area.left));
+		dimensions->Set(NanNew("y"), NanNew<Number>(area.top));
+		dimensions->Set(NanNew("width"), NanNew<Number>(area.right - area.left));
+		dimensions->Set(NanNew("height"), NanNew<Number>(area.bottom - area.top));
+		NanReturnValue(dimensions->NewInstance());
 	} else {
-		return scope.Close(Undefined());
+		NanReturnUndefined();
 	}
 }
+

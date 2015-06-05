@@ -37,34 +37,34 @@ void Rsvg::Init(Handle<Object> exports) {
 #endif
 
 	// Prepare constructor template.
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-	tpl->SetClassName(String::NewSymbol("Rsvg"));
+	Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
+	tpl->SetClassName(NanNew<String>("Rsvg"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 	// Add methods to prototype.
-	Local<ObjectTemplate> prototype = tpl->PrototypeTemplate();
-	prototype->Set("getBaseURI", FunctionTemplate::New(GetBaseURI)->GetFunction());
-	prototype->Set("setBaseURI", FunctionTemplate::New(SetBaseURI)->GetFunction());
-	prototype->Set("getDPI", FunctionTemplate::New(GetDPI)->GetFunction());
-	prototype->Set("setDPI", FunctionTemplate::New(SetDPI)->GetFunction());
-	prototype->Set("getDPIX", FunctionTemplate::New(GetDPIX)->GetFunction());
-	prototype->Set("setDPIX", FunctionTemplate::New(SetDPIX)->GetFunction());
-	prototype->Set("getDPIY", FunctionTemplate::New(GetDPIY)->GetFunction());
-	prototype->Set("setDPIY", FunctionTemplate::New(SetDPIY)->GetFunction());
-	prototype->Set("getWidth", FunctionTemplate::New(GetWidth)->GetFunction());
-	prototype->Set("getHeight", FunctionTemplate::New(GetHeight)->GetFunction());
-	prototype->Set("write", FunctionTemplate::New(Write)->GetFunction());
-	prototype->Set("close", FunctionTemplate::New(Close)->GetFunction());
-	prototype->Set("dimensions", FunctionTemplate::New(Dimensions)->GetFunction());
-	prototype->Set("hasElement", FunctionTemplate::New(HasElement)->GetFunction());
-	prototype->Set("autocrop", FunctionTemplate::New(Autocrop)->GetFunction());
-	prototype->Set("render", FunctionTemplate::New(Render)->GetFunction());
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getBaseURI", GetBaseURI);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "setBaseURI", SetBaseURI);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getDPI", GetDPI);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "setDPI", SetDPI);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getDPIX", GetDPIX);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "setDPIX", SetDPIX);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getDPIY", GetDPIY);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "setDPIY", SetDPIY);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getWidth", GetWidth);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "getHeight", GetHeight);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "write", Write);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "dimensions", Dimensions);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "hasElement", HasElement);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "autocrop", Autocrop);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "render", Render);
 	// Export class.
-	constructor = Persistent<Function>::New(tpl->GetFunction());
-	exports->Set(String::New("Rsvg"), constructor);
+        Local<Function> tplFunc = tpl->GetFunction();
+	NanAssignPersistent(constructor, tplFunc);
+	exports->Set(NanNew("Rsvg"), tplFunc);
 }
 
-Handle<Value> Rsvg::New(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::New) {
+	NanScope();
 
 	if (args.IsConstructCall()) {
 		// Invoked as constructor: `new Rsvg(...)`
@@ -78,42 +78,41 @@ Handle<Value> Rsvg::New(const Arguments& args) {
 			handle = rsvg_handle_new_from_data(buffer, length, &error);
 
 			if (error) {
-				ThrowException(Exception::Error(String::New(error->message)));
+				NanThrowError(error->message);
 				g_error_free(error);
-				return scope.Close(Undefined());
+                                NanReturnUndefined();
 			}
 		} else {
 			handle = rsvg_handle_new();
 		}
 		// Error handling.
 		if (!handle) {
-			ThrowException(Exception::Error(String::New(
-				"Unable to create RsvgHandle instance."
-			)));
-			return scope.Close(Undefined());
+			NanThrowError("Unable to create RsvgHandle instance.");
+			NanReturnUndefined();
 		}
 		// Create object.
 		Rsvg* obj = new Rsvg(handle);
 		obj->Wrap(args.This());
-		return scope.Close(args.This());
+		NanReturnValue(args.This());
 	} else {
 		// Invoked as plain function `Rsvg(...)`, turn into construct call.
 		const int argc = 1;
 		Local<Value> argv[argc] = { args[0] };
-		return scope.Close(constructor->NewInstance(argc, argv));
+		NanReturnValue(NanNew<Function>(constructor)->NewInstance(argc, argv));
 	}
 }
 
-Handle<Value> Rsvg::GetBaseURI(const Arguments& args) {
-	return GetStringProperty(args, "base-uri");
+NAN_METHOD(Rsvg::GetBaseURI) {
+        NanScope();
+	NanReturnValue(GetStringProperty("base-uri", args));
 }
 
-Handle<Value> Rsvg::SetBaseURI(const Arguments& args) {
-	return SetStringProperty(args, "base-uri");
+NAN_METHOD(Rsvg::SetBaseURI) {
+	SetStringProperty("base-uri", args);
 }
 
-Handle<Value> Rsvg::GetDPI(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::GetDPI) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gdouble dpiX = 0;
 	gdouble dpiY = 0;
@@ -124,15 +123,15 @@ Handle<Value> Rsvg::GetDPI(const Arguments& args) {
 		NULL
 	);
 
-	Handle<ObjectTemplate> dpi = ObjectTemplate::New();
-	dpi->Set("x", Number::New(dpiX));
-	dpi->Set("y", Number::New(dpiY));
+	Handle<ObjectTemplate> dpi = NanNew<ObjectTemplate>();
+	dpi->Set(NanNew("x"), NanNew<Number>(dpiX));
+	dpi->Set(NanNew("y"), NanNew<Number>(dpiY));
 
-	return scope.Close(dpi->NewInstance());
+	NanReturnValue(dpi->NewInstance());
 }
 
-Handle<Value> Rsvg::SetDPI(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::SetDPI) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	gdouble x = args[0]->NumberValue();
@@ -149,35 +148,38 @@ Handle<Value> Rsvg::SetDPI(const Arguments& args) {
 	}
 
 	rsvg_handle_set_dpi_x_y(obj->_handle, x, y);
-	return scope.Close(Undefined());
 }
 
-Handle<Value> Rsvg::GetDPIX(const Arguments& args) {
-	return GetNumberProperty(args, "dpi-x");
+NAN_METHOD(Rsvg::GetDPIX) {
+        NanScope();
+	NanReturnValue(GetNumberProperty("dpi-x", args));
 }
 
-Handle<Value> Rsvg::SetDPIX(const Arguments& args) {
-	return SetNumberProperty(args, "dpi-x");
+NAN_METHOD(Rsvg::SetDPIX) {
+	SetNumberProperty("dpi-x", args);
 }
 
-Handle<Value> Rsvg::GetDPIY(const Arguments& args) {
-	return GetNumberProperty(args, "dpi-y");
+NAN_METHOD(Rsvg::GetDPIY) {
+        NanScope();
+	NanReturnValue(GetNumberProperty("dpi-y", args));
 }
 
-Handle<Value> Rsvg::SetDPIY(const Arguments& args) {
-	return SetNumberProperty(args, "dpi-y");
+NAN_METHOD(Rsvg::SetDPIY) {
+	SetNumberProperty("dpi-y", args);
 }
 
-Handle<Value> Rsvg::GetWidth(const Arguments& args) {
-	return GetIntegerProperty(args, "width");
+NAN_METHOD(Rsvg::GetWidth) {
+        NanScope();
+	NanReturnValue(GetIntegerProperty("width", args));
 }
 
-Handle<Value> Rsvg::GetHeight(const Arguments& args) {
-	return GetIntegerProperty(args, "height");
+NAN_METHOD(Rsvg::GetHeight) {
+        NanScope();
+	NanReturnValue(GetIntegerProperty("height", args));
 }
 
-Handle<Value> Rsvg::Write(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::Write) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	if (Buffer::HasInstance(args[0])) {
 		const guchar* buffer =
@@ -188,35 +190,33 @@ Handle<Value> Rsvg::Write(const Arguments& args) {
 		gboolean success = rsvg_handle_write(obj->_handle, buffer, length, &error);
 
 		if (error) {
-			ThrowException(Exception::Error(String::New(error->message)));
+			NanThrowError(error->message);
 			g_error_free(error);
 		} else if (!success) {
-			ThrowException(Exception::Error(String::New("Failed to write data.")));
+			NanThrowError("Failed to write data.");
 		}
 	} else {
-		ThrowException(Exception::TypeError(String::New("Invalid argument: buffer")));
-	}
-	return scope.Close(Undefined());
+		NanThrowError("Invalid argument: buffer");
+        }
 }
 
-Handle<Value> Rsvg::Close(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::Close) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	GError* error = NULL;
 	gboolean success = rsvg_handle_close(obj->_handle, &error);
 
 	if (error) {
-		ThrowException(Exception::Error(String::New(error->message)));
+		NanThrowError(error->message);
 		g_error_free(error);
 	} else if (!success) {
-		ThrowException(Exception::Error(String::New("Failed to close.")));
+		NanThrowError("Failed to close.");
 	}
-	return scope.Close(Undefined());
 }
 
-Handle<Value> Rsvg::Dimensions(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::Dimensions) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	const char* id = NULL;
@@ -224,8 +224,8 @@ Handle<Value> Rsvg::Dimensions(const Arguments& args) {
 	if (!(args[0]->IsUndefined() || args[0]->IsNull())) {
 		id = *idArg;
 		if (!id) {
-			ThrowException(Exception::TypeError(String::New("Invalid argument: id")));
-			return scope.Close(Undefined());
+			NanThrowError("Invalid argument: id");
+                        NanReturnUndefined();
 		}
 	}
 
@@ -236,23 +236,23 @@ Handle<Value> Rsvg::Dimensions(const Arguments& args) {
 	gboolean hasDimensions = rsvg_handle_get_dimensions_sub(obj->_handle, &_dimensions, id);
 
 	if (hasPosition || hasDimensions) {
-		Handle<ObjectTemplate> dimensions = ObjectTemplate::New();
+		Handle<ObjectTemplate> dimensions = NanNew<ObjectTemplate>();
 		if (hasPosition) {
-			dimensions->Set("x", Integer::New(_position.x));
-			dimensions->Set("y", Integer::New(_position.y));
+			dimensions->Set(NanNew("x"), NanNew<Integer>(_position.x));
+			dimensions->Set(NanNew("y"), NanNew<Integer>(_position.y));
 		}
 		if (hasDimensions) {
-			dimensions->Set("width", Integer::New(_dimensions.width));
-			dimensions->Set("height", Integer::New(_dimensions.height));
+			dimensions->Set(NanNew("width"), NanNew<Integer>(_dimensions.width));
+			dimensions->Set(NanNew("height"), NanNew<Integer>(_dimensions.height));
 		}
-		return scope.Close(dimensions->NewInstance());
+		NanReturnValue(dimensions->NewInstance());
 	} else {
-		return scope.Close(Null());
+		NanReturnNull();
 	}
 }
 
-Handle<Value> Rsvg::HasElement(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::HasElement) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	const char* id = NULL;
@@ -260,29 +260,29 @@ Handle<Value> Rsvg::HasElement(const Arguments& args) {
 	if (!(args[0]->IsUndefined() || args[0]->IsNull())) {
 		id = *idArg;
 		if (!id) {
-			ThrowException(Exception::TypeError(String::New("Invalid argument: id")));
-			return scope.Close(Undefined());
+			NanThrowError("Invalid argument: id");
+                        NanReturnUndefined();
 		}
 	}
 
 	gboolean exists = rsvg_handle_has_sub(obj->_handle, id);
-	return scope.Close(Boolean::New(exists));
+	NanReturnValue(NanNew<Boolean>(exists));
 }
 
-Handle<Value> Rsvg::Render(const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Rsvg::Render) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 
 	int width = args[0]->Int32Value();
 	int height = args[1]->Int32Value();
 
 	if (width <= 0) {
-		ThrowException(Exception::RangeError(String::New("Expected width > 0.")));
-		return scope.Close(Undefined());
+		NanThrowError("Expected width > 0.");
+                NanReturnUndefined();
 	}
 	if (height <= 0) {
-		ThrowException(Exception::RangeError(String::New("Expected height > 0.")));
-		return scope.Close(Undefined());
+		NanThrowError("Expected height > 0.");
+		NanReturnUndefined();
 	}
 
 	String::Utf8Value formatArg(args[2]);
@@ -293,21 +293,21 @@ Handle<Value> Rsvg::Render(const Arguments& args) {
 			renderFormat == RENDER_FORMAT_PNG) {
 		pixelFormat = CAIRO_FORMAT_ARGB32;
 	} else if (renderFormat == RENDER_FORMAT_JPEG) {
-		ThrowException(Exception::Error(String::New("Format not supported: JPEG")));
-		return scope.Close(Undefined());
+		NanThrowError("Format not supported: JPEG");
+                NanReturnUndefined();
 	} else if (
 			renderFormat == RENDER_FORMAT_SVG ||
 			renderFormat == RENDER_FORMAT_PDF) {
 		pixelFormat = CAIRO_FORMAT_INVALID;
 	} else if (renderFormat == RENDER_FORMAT_VIPS) {
-		ThrowException(Exception::Error(String::New("Format not supported: VIPS")));
-		return scope.Close(Undefined());
+		NanThrowError("Format not supported: VIPS");
+                NanReturnUndefined();
 	} else {
 		renderFormat = RENDER_FORMAT_RAW;
 		pixelFormat = CairoFormatFromString(formatString);
 		if (pixelFormat == CAIRO_FORMAT_INVALID) {
-			ThrowException(Exception::RangeError(String::New("Invalid argument: format")));
-			return scope.Close(Undefined());
+			NanThrowError("Invalid argument: format");
+                        NanReturnUndefined();
 		}
 	}
 
@@ -316,14 +316,12 @@ Handle<Value> Rsvg::Render(const Arguments& args) {
 	if (!(args[3]->IsUndefined() || args[3]->IsNull())) {
 		id = *idArg;
 		if (!id) {
-			ThrowException(Exception::TypeError(String::New("Invalid argument: id")));
-			return scope.Close(Undefined());
+			NanThrowError("Invalid argument: id");
+                        NanReturnUndefined();
 		}
 		if (!rsvg_handle_has_sub(obj->_handle, id)) {
-			ThrowException(Exception::RangeError(String::New(
-				"SVG element with given id does not exists."
-			)));
-			return scope.Close(Undefined());
+			NanThrowError("SVG element with given id does not exists.");
+                        NanReturnUndefined();
 		}
 	}
 
@@ -331,23 +329,17 @@ Handle<Value> Rsvg::Render(const Arguments& args) {
 	RsvgDimensionData dimensions = { 0, 0, 0, 0 };
 
 	if (!rsvg_handle_get_position_sub(obj->_handle, &position, id)) {
-		ThrowException(Exception::Error(String::New(
-			"Could not get position of SVG element with given id."
-		)));
-		return scope.Close(Undefined());
+		NanThrowError("Could not get position of SVG element with given id.");
+                NanReturnUndefined();
 	}
 
 	if (!rsvg_handle_get_dimensions_sub(obj->_handle, &dimensions, id)) {
-		ThrowException(Exception::Error(String::New(
-			"Could not get dimensions of SVG element or whole image."
-		)));
-		return scope.Close(Undefined());
+		NanThrowError("Could not get dimensions of SVG element or whole image.");
+                NanReturnUndefined();
 	}
 	if (dimensions.width <= 0 || dimensions.height <= 0) {
-		ThrowException(Exception::Error(String::New(
-			"Got invalid dimensions of SVG element or whole image."
-		)));
-		return scope.Close(Undefined());
+		NanThrowError("Got invalid dimensions of SVG element or whole image.");
+                NanReturnUndefined();
 	}
 
 	std::string data;
@@ -402,10 +394,10 @@ Handle<Value> Rsvg::Render(const Arguments& args) {
 		cairo_destroy(cr);
 		cairo_surface_destroy(surface);
 
-		ThrowException(Exception::Error(String::New(
+		NanThrowError(
 			status ? cairo_status_to_string(status) : "Failed to render image."
-		)));
-		return scope.Close(Undefined());
+		);
+                NanReturnUndefined();
 	}
 
 	int stride = -1;
@@ -425,45 +417,46 @@ Handle<Value> Rsvg::Render(const Arguments& args) {
 	if (renderFormat == RENDER_FORMAT_RAW &&
 			pixelFormat == CAIRO_FORMAT_ARGB32 &&
 			stride != width * 4) {
-		ThrowException(Exception::Error(String::New(
+		NanThrowError(
 			"Rendered with invalid stride (byte size of row) for ARGB32 format."
-		)));
-		return scope.Close(Undefined());
+		);
+                NanReturnUndefined();
 	}
 
 	Handle<ObjectTemplate> image = ObjectTemplate::New();
 	if (renderFormat == RENDER_FORMAT_SVG) {
-		image->Set("data", String::New(data.c_str()));
+		image->Set(NanNew("data"), NanNew<String>(data.c_str()));
 	} else {
-		image->Set("data", Buffer::New(data.c_str(), data.length())->handle_);
+		image->Set(NanNew("data"), NanNewBufferHandle(data.c_str(), data.length()));
 	}
 
-	image->Set("format", RenderFormatToString(renderFormat));
+	image->Set(NanNew("format"), RenderFormatToString(renderFormat));
 	if (pixelFormat != CAIRO_FORMAT_INVALID) {
-		image->Set("pixelFormat", CairoFormatToString(pixelFormat));
+		image->Set(NanNew("pixelFormat"), CairoFormatToString(pixelFormat));
 	}
-	image->Set("width", Integer::New(width));
-	image->Set("height", Integer::New(height));
+	image->Set(NanNew("width"), NanNew<Integer>(width));
+	image->Set(NanNew("height"), NanNew<Integer>(height));
 	if (stride != -1) {
-		image->Set("stride", Integer::New(stride));
+		image->Set(NanNew("stride"), NanNew<Integer>(stride));
 	}
-	return scope.Close(image->NewInstance());
+	NanReturnValue(image->NewInstance());
 }
 
-Handle<Value> Rsvg::GetStringProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+Handle<Value> Rsvg::GetStringProperty (const char* property, const ARGTYPE& args) {
+	NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gchar* value = NULL;
 	g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
-	Handle<Value> result(value ? String::New(value) : Null());
+	Handle<Value> result = NanNew<String>(value);
 	if (value) {
 		g_free(value);
+	        return result;
 	}
-	return scope.Close(result);
+        return NanNull();
 }
 
-Handle<Value> Rsvg::SetStringProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+void Rsvg::SetStringProperty (const char* property, const ARGTYPE& args) {
+        NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gchar* value = NULL;
 	String::Utf8Value arg0(args[0]);
@@ -471,42 +464,39 @@ Handle<Value> Rsvg::SetStringProperty(const Arguments& args, const char* propert
 		value = *arg0;
 	}
 	g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
-	return scope.Close(Undefined());
 }
 
-Handle<Value> Rsvg::GetNumberProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+Handle<Value> Rsvg::GetNumberProperty (const char* property, const ARGTYPE& args) {
+        NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gdouble value = 0;
 	g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
-	return scope.Close(Number::New(value));
+	return NanNew<Number>(value);
 }
 
-Handle<Value> Rsvg::SetNumberProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+void Rsvg::SetNumberProperty (const char* property, const ARGTYPE& args) {
+        NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gdouble value = args[0]->NumberValue();
 	if (std::isnan(value)) {
 		value = 0;
 	}
 	g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
-	return scope.Close(Undefined());
 }
 
-Handle<Value> Rsvg::GetIntegerProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+Handle<Value> Rsvg::GetIntegerProperty (const char* property, const ARGTYPE& args) {
+        NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gint value = 0;
 	g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
-	return scope.Close(Integer::New(value));
+	return NanNew<Integer>(value);
 }
 
-Handle<Value> Rsvg::SetIntegerProperty(const Arguments& args, const char* property) {
-	HandleScope scope;
+void Rsvg::SetIntegerProperty (const char* property, const ARGTYPE& args) {
+        NanScope();
 	Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(args.This());
 	gint value = args[0]->Int32Value();
 	g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
-	return scope.Close(Undefined());
 }
 
 NODE_MODULE(rsvg, Rsvg::Init)

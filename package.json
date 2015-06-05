@@ -22,7 +22,8 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "bindings": "~1.2.0"
+    "bindings": "~1.2.0",
+    "nan": "^1.8.4"
   },
   "devDependencies": {
     "chai": "~1.8.1",
