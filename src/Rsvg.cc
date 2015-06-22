@@ -108,7 +108,9 @@ NAN_METHOD(Rsvg::GetBaseURI) {
 }
 
 NAN_METHOD(Rsvg::SetBaseURI) {
+	NanScope();
 	SetStringProperty("base-uri", args);
+	NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::GetDPI) {
@@ -148,6 +150,7 @@ NAN_METHOD(Rsvg::SetDPI) {
 	}
 
 	rsvg_handle_set_dpi_x_y(obj->_handle, x, y);
+	NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::GetDPIX) {
@@ -156,7 +159,9 @@ NAN_METHOD(Rsvg::GetDPIX) {
 }
 
 NAN_METHOD(Rsvg::SetDPIX) {
+	NanScope();
 	SetNumberProperty("dpi-x", args);
+	NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::GetDPIY) {
@@ -165,7 +170,9 @@ NAN_METHOD(Rsvg::GetDPIY) {
 }
 
 NAN_METHOD(Rsvg::SetDPIY) {
+	NanScope();
 	SetNumberProperty("dpi-y", args);
+	NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::GetWidth) {
@@ -198,6 +205,7 @@ NAN_METHOD(Rsvg::Write) {
 	} else {
 		NanThrowError("Invalid argument: buffer");
         }
+        NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::Close) {
@@ -213,6 +221,7 @@ NAN_METHOD(Rsvg::Close) {
 	} else if (!success) {
 		NanThrowError("Failed to close.");
 	}
+	NanReturnUndefined();
 }
 
 NAN_METHOD(Rsvg::Dimensions) {
