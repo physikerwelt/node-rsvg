@@ -172,7 +172,7 @@ NAN_METHOD(Rsvg::Autocrop) {
 
 	RsvgDimensionData dimensions = { 0, 0, 0, 0 };
 	rsvg_handle_get_dimensions(obj->_handle, &dimensions);
-	autocrop_region_t area = { 0, dimensions.height, 0, dimensions.width };
+	autocrop_region_t area = { 0, static_cast<double>(dimensions.height), 0, static_cast<double>(dimensions.width) };
 
 	if (AutocropRecursive(obj->_handle, &area, 1) &&
 			AutocropRecursive(obj->_handle, &area, 2) &&
