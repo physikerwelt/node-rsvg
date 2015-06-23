@@ -1,6 +1,6 @@
 {
   "name": "librsvg",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "description": "Parse SVG files and render them as PNG, PDF, SVG, or raw memory buffer images.",
   "keywords": [
     "svg",
