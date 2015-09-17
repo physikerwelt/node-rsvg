@@ -8,7 +8,7 @@
 #include "nan.h"
 
 #if NODE_VERSION_AT_LEAST(0, 11, 3)
-    #define ARGTYPE v8::FunctionCallbackInfo<v8::Value>
+    #define ARGTYPE Nan::FunctionCallbackInfo<v8::Value>
 #else
     #define ARGTYPE v8::Arguments
 #endif
@@ -38,12 +38,12 @@ private:
 	static NAN_METHOD(HasElement);
 	static NAN_METHOD(Autocrop);
 	static NAN_METHOD(Render);
-        static v8::Handle<v8::Value> GetStringProperty(const char* property, const ARGTYPE& args);
-        static void SetStringProperty(const char* property, const ARGTYPE& args);
-        static v8::Handle<v8::Value> GetNumberProperty(const char* property, const ARGTYPE& args);
-        static void SetNumberProperty(const char* property, const ARGTYPE& args);
-        static v8::Handle<v8::Value> GetIntegerProperty(const char* property, const ARGTYPE& args);
-        static void SetIntegerProperty(const char* property, const ARGTYPE& args);
+        static v8::Handle<v8::Value> GetStringProperty(const char* property, const ARGTYPE& info);
+        static void SetStringProperty(const char* property, const ARGTYPE& info);
+        static v8::Handle<v8::Value> GetNumberProperty(const char* property, const ARGTYPE& info);
+        static void SetNumberProperty(const char* property, const ARGTYPE& info);
+        static v8::Handle<v8::Value> GetIntegerProperty(const char* property, const ARGTYPE& info);
+        static void SetIntegerProperty(const char* property, const ARGTYPE& info);
 	static v8::Persistent<v8::Function> constructor;
 	RsvgHandle* const _handle;
 };
