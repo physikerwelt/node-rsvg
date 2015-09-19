@@ -3,6 +3,7 @@
 #include "RsvgCairo.h"
 #include <node.h>
 #include <cmath>
+#include "compat.h"
 
 using namespace v8;
 
@@ -168,7 +169,7 @@ static bool AutocropRecursive(RsvgHandle* handle, autocrop_region_t* region, int
 
 NAN_METHOD(Rsvg::Autocrop) {
     Nan::HandleScope scope;
-    Rsvg* obj = node::ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = node::ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
     RsvgDimensionData dimensions = { 0, 0, 0, 0 };
     rsvg_handle_get_dimensions(obj->_handle, &dimensions);
@@ -183,9 +184,9 @@ NAN_METHOD(Rsvg::Autocrop) {
         dimensions->Set(Nan::New("y").ToLocalChecked(), Nan::New<Number>(area.top));
         dimensions->Set(Nan::New("width").ToLocalChecked(), Nan::New<Number>(area.right - area.left));
         dimensions->Set(Nan::New("height").ToLocalChecked(), Nan::New<Number>(area.bottom - area.top));
-        info.GetReturnValue().Set(dimensions->NewInstance());
+        ARGVAR.GetReturnValue().Set(dimensions->NewInstance());
     } else {
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 }
 

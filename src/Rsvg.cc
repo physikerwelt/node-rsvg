@@ -20,7 +20,7 @@ cairo_status_t GetDataChunks(void* closure, const unsigned char* chunk, unsigned
     return CAIRO_STATUS_SUCCESS;
 }
 
-Persistent<Function> Rsvg::constructor;
+Nan::Persistent<Function> Rsvg::constructor;
 
 Rsvg::Rsvg(RsvgHandle* const handle) : _handle(handle) {}
 
@@ -59,20 +59,20 @@ void Rsvg::Init(Handle<Object> exports) {
     Nan::SetPrototypeMethod(tpl, "render", Render);
     // Export class.
     Local<Function> tplFunc = tpl->GetFunction();
-    constructor.Reset(v8::Isolate::GetCurrent(), tplFunc); // TODO: кишки изолятов по идее не должны торчать наружу, т.к. скорее всего несовместимо с ранними версиями ноды
+    constructor.Reset(tplFunc);
     exports->Set(Nan::New("Rsvg").ToLocalChecked(), tplFunc);
 }
 
 NAN_METHOD(Rsvg::New) {
     Nan::HandleScope scope;
 
-    if (info.IsConstructCall()) {
+    if (ARGVAR.IsConstructCall()) {
         // Invoked as constructor: `new Rsvg(...)`
         RsvgHandle* handle;
-        if (Buffer::HasInstance(info[0])) {
+        if (Buffer::HasInstance(ARGVAR[0])) {
             const guint8* buffer =
-                reinterpret_cast<guint8*>(Buffer::Data(info[0]));
-            gsize length = Buffer::Length(info[0]);
+                reinterpret_cast<guint8*>(Buffer::Data(ARGVAR[0]));
+            gsize length = Buffer::Length(ARGVAR[0]);
 
             GError* error = NULL;
             handle = rsvg_handle_new_from_data(buffer, length, &error);
@@ -80,7 +80,7 @@ NAN_METHOD(Rsvg::New) {
             if (error) {
                 Nan::ThrowError(error->message);
                 g_error_free(error);
-                info.GetReturnValue().Set(Nan::Undefined());
+                ARGVAR.GetReturnValue().Set(Nan::Undefined());
             }
         } else {
             handle = rsvg_handle_new();
@@ -88,34 +88,34 @@ NAN_METHOD(Rsvg::New) {
         // Error handling.
         if (!handle) {
             Nan::ThrowError("Unable to create RsvgHandle instance.");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
         // Create object.
         Rsvg* obj = new Rsvg(handle);
-        obj->Wrap(info.This());
-        info.GetReturnValue().Set(info.This());
+        obj->Wrap(ARGVAR.This());
+        ARGVAR.GetReturnValue().Set(ARGVAR.This());
     } else {
         // Invoked as plain function `Rsvg(...)`, turn into construct call.
         const int argc = 1;
-        Local<Value> argv[argc] = { info[0] };
-        info.GetReturnValue().Set(Nan::New<Function>(constructor)->NewInstance(argc, argv));
+        Local<Value> argv[argc] = { ARGVAR[0] };
+        ARGVAR.GetReturnValue().Set(Nan::New<Function>(constructor)->NewInstance(argc, argv));
     }
 }
 
 NAN_METHOD(Rsvg::GetBaseURI) {
     Nan::HandleScope scope;
-    info.GetReturnValue().Set(GetStringProperty("base-uri", info));
+    ARGVAR.GetReturnValue().Set(GetStringProperty("base-uri", ARGVAR));
 }
 
 NAN_METHOD(Rsvg::SetBaseURI) {
     Nan::HandleScope scope;
-    SetStringProperty("base-uri", info);
-    info.GetReturnValue().Set(Nan::Undefined());
+    SetStringProperty("base-uri", ARGVAR);
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::GetDPI) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gdouble dpiX = 0;
     gdouble dpiY = 0;
     g_object_get(
@@ -129,69 +129,69 @@ NAN_METHOD(Rsvg::GetDPI) {
     dpi->Set(Nan::New("x").ToLocalChecked(), Nan::New<Number>(dpiX));
     dpi->Set(Nan::New("y").ToLocalChecked(), Nan::New<Number>(dpiY));
 
-    info.GetReturnValue().Set(dpi->NewInstance());
+    ARGVAR.GetReturnValue().Set(dpi->NewInstance());
 }
 
 NAN_METHOD(Rsvg::SetDPI) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
-    gdouble x = info[0]->NumberValue();
+    gdouble x = ARGVAR[0]->NumberValue();
     if (std::isnan(x)) {
         x = 0;
     }
 
     gdouble y = x;
-    if (info[1]->IsNumber()) {
-        y = info[1]->NumberValue();
+    if (ARGVAR[1]->IsNumber()) {
+        y = ARGVAR[1]->NumberValue();
         if (std::isnan(y)) {
             y = 0;
         }
     }
 
     rsvg_handle_set_dpi_x_y(obj->_handle, x, y);
-    info.GetReturnValue().Set(Nan::Undefined());
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::GetDPIX) {
     Nan::HandleScope scope;
-    info.GetReturnValue().Set(GetNumberProperty("dpi-x", info));
+    ARGVAR.GetReturnValue().Set(GetNumberProperty("dpi-x", ARGVAR));
 }
 
 NAN_METHOD(Rsvg::SetDPIX) {
     Nan::HandleScope scope;
-    SetNumberProperty("dpi-x", info);
-    info.GetReturnValue().Set(Nan::Undefined());
+    SetNumberProperty("dpi-x", ARGVAR);
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::GetDPIY) {
     Nan::HandleScope scope;
-    info.GetReturnValue().Set(GetNumberProperty("dpi-y", info));
+    ARGVAR.GetReturnValue().Set(GetNumberProperty("dpi-y", ARGVAR));
 }
 
 NAN_METHOD(Rsvg::SetDPIY) {
     Nan::HandleScope scope;
-    SetNumberProperty("dpi-y", info);
-    info.GetReturnValue().Set(Nan::Undefined());
+    SetNumberProperty("dpi-y", ARGVAR);
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::GetWidth) {
     Nan::HandleScope scope;
-    info.GetReturnValue().Set(GetIntegerProperty("width", info));
+    ARGVAR.GetReturnValue().Set(GetIntegerProperty("width", ARGVAR));
 }
 
 NAN_METHOD(Rsvg::GetHeight) {
     Nan::HandleScope scope;
-    info.GetReturnValue().Set(GetIntegerProperty("height", info));
+    ARGVAR.GetReturnValue().Set(GetIntegerProperty("height", ARGVAR));
 }
 
 NAN_METHOD(Rsvg::Write) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
-    if (Buffer::HasInstance(info[0])) {
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
+    if (Buffer::HasInstance(ARGVAR[0])) {
         const guchar* buffer =
-            reinterpret_cast<guchar*>(Buffer::Data(info[0]));
-        gsize length = Buffer::Length(info[0]);
+            reinterpret_cast<guchar*>(Buffer::Data(ARGVAR[0]));
+        gsize length = Buffer::Length(ARGVAR[0]);
 
         GError* error = NULL;
         gboolean success = rsvg_handle_write(obj->_handle, buffer, length, &error);
@@ -205,12 +205,12 @@ NAN_METHOD(Rsvg::Write) {
     } else {
         Nan::ThrowError("Invalid argument: buffer");
     }
-    info.GetReturnValue().Set(Nan::Undefined());
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::Close) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
     GError* error = NULL;
     gboolean success = rsvg_handle_close(obj->_handle, &error);
@@ -221,20 +221,20 @@ NAN_METHOD(Rsvg::Close) {
     } else if (!success) {
         Nan::ThrowError("Failed to close.");
     }
-    info.GetReturnValue().Set(Nan::Undefined());
+    ARGVAR.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(Rsvg::Dimensions) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
     const char* id = NULL;
-    String::Utf8Value idArg(info[0]);
-    if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
+    String::Utf8Value idArg(ARGVAR[0]);
+    if (!(ARGVAR[0]->IsUndefined() || ARGVAR[0]->IsNull())) {
         id = *idArg;
         if (!id) {
             Nan::ThrowError("Invalid argument: id");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
     }
 
@@ -254,47 +254,47 @@ NAN_METHOD(Rsvg::Dimensions) {
             dimensions->Set(Nan::New("width").ToLocalChecked(), Nan::New<Integer>(_dimensions.width));
             dimensions->Set(Nan::New("height").ToLocalChecked(), Nan::New<Integer>(_dimensions.height));
         }
-        info.GetReturnValue().Set(dimensions->NewInstance());
+        ARGVAR.GetReturnValue().Set(dimensions->NewInstance());
     } else {
-        info.GetReturnValue().Set(Nan::Null());
+        ARGVAR.GetReturnValue().Set(Nan::Null());
     }
 }
 
 NAN_METHOD(Rsvg::HasElement) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
     const char* id = NULL;
-    String::Utf8Value idArg(info[0]);
-    if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
+    String::Utf8Value idArg(ARGVAR[0]);
+    if (!(ARGVAR[0]->IsUndefined() || ARGVAR[0]->IsNull())) {
         id = *idArg;
         if (!id) {
             Nan::ThrowError("Invalid argument: id");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
     }
 
     gboolean exists = rsvg_handle_has_sub(obj->_handle, id);
-    info.GetReturnValue().Set(Nan::New<Boolean>(exists));
+    ARGVAR.GetReturnValue().Set(Nan::New<Boolean>(exists));
 }
 
 NAN_METHOD(Rsvg::Render) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
 
-    int width = info[0]->Int32Value();
-    int height = info[1]->Int32Value();
+    int width = ARGVAR[0]->Int32Value();
+    int height = ARGVAR[1]->Int32Value();
 
     if (width <= 0) {
         Nan::ThrowError("Expected width > 0.");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
     if (height <= 0) {
         Nan::ThrowError("Expected height > 0.");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 
-    String::Utf8Value formatArg(info[2]);
+    String::Utf8Value formatArg(ARGVAR[2]);
     const char* formatString = *formatArg;
     render_format_t renderFormat = RenderFormatFromString(formatString);
     cairo_format_t pixelFormat = CAIRO_FORMAT_INVALID;
@@ -303,34 +303,34 @@ NAN_METHOD(Rsvg::Render) {
         pixelFormat = CAIRO_FORMAT_ARGB32;
     } else if (renderFormat == RENDER_FORMAT_JPEG) {
         Nan::ThrowError("Format not supported: JPEG");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     } else if (
             renderFormat == RENDER_FORMAT_SVG ||
             renderFormat == RENDER_FORMAT_PDF) {
         pixelFormat = CAIRO_FORMAT_INVALID;
     } else if (renderFormat == RENDER_FORMAT_VIPS) {
         Nan::ThrowError("Format not supported: VIPS");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     } else {
         renderFormat = RENDER_FORMAT_RAW;
         pixelFormat = CairoFormatFromString(formatString);
         if (pixelFormat == CAIRO_FORMAT_INVALID) {
             Nan::ThrowError("Invalid argument: format");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
     }
 
     const char* id = NULL;
-    String::Utf8Value idArg(info[3]);
-    if (!(info[3]->IsUndefined() || info[3]->IsNull())) {
+    String::Utf8Value idArg(ARGVAR[3]);
+    if (!(ARGVAR[3]->IsUndefined() || ARGVAR[3]->IsNull())) {
         id = *idArg;
         if (!id) {
             Nan::ThrowError("Invalid argument: id");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
         if (!rsvg_handle_has_sub(obj->_handle, id)) {
             Nan::ThrowError("SVG element with given id does not exists.");
-            info.GetReturnValue().Set(Nan::Undefined());
+            ARGVAR.GetReturnValue().Set(Nan::Undefined());
         }
     }
 
@@ -339,16 +339,16 @@ NAN_METHOD(Rsvg::Render) {
 
     if (!rsvg_handle_get_position_sub(obj->_handle, &position, id)) {
         Nan::ThrowError("Could not get position of SVG element with given id.");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 
     if (!rsvg_handle_get_dimensions_sub(obj->_handle, &dimensions, id)) {
         Nan::ThrowError("Could not get dimensions of SVG element or whole image.");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
     if (dimensions.width <= 0 || dimensions.height <= 0) {
         Nan::ThrowError("Got invalid dimensions of SVG element or whole image.");
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 
     std::string data;
@@ -406,7 +406,7 @@ NAN_METHOD(Rsvg::Render) {
         Nan::ThrowError(
                 status ? cairo_status_to_string(status) : "Failed to render image."
                 );
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 
     int stride = -1;
@@ -429,7 +429,7 @@ NAN_METHOD(Rsvg::Render) {
         Nan::ThrowError(
                 "Rendered with invalid stride (byte size of row) for ARGB32 format."
                 );
-        info.GetReturnValue().Set(Nan::Undefined());
+        ARGVAR.GetReturnValue().Set(Nan::Undefined());
     }
 
     Handle<ObjectTemplate> image = ObjectTemplate::New();
@@ -448,63 +448,63 @@ NAN_METHOD(Rsvg::Render) {
     if (stride != -1) {
         image->Set(Nan::New("stride").ToLocalChecked(), Nan::New<Integer>(stride));
     }
-    info.GetReturnValue().Set(image->NewInstance());
+    ARGVAR.GetReturnValue().Set(image->NewInstance());
 }
 
-Handle<Value> Rsvg::GetStringProperty (const char* property, const ARGTYPE& info) {
+v8::Local<v8::String> Rsvg::GetStringProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gchar* value = NULL;
     g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
-    Handle<Value> result = Nan::New<String>(value).ToLocalChecked();
+    v8::Local<String> result = Nan::New<String>(value).ToLocalChecked();
     if (value) {
         g_free(value);
         return result;
     }
-    return Nan::Null();
+    return Nan::EmptyString(); // TODO: possibly breaking change: returning empty string instead of null!
 }
 
-void Rsvg::SetStringProperty (const char* property, const ARGTYPE& info) {
+void Rsvg::SetStringProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gchar* value = NULL;
-    String::Utf8Value arg0(info[0]);
-    if (!(info[0]->IsNull() || info[0]->IsUndefined())) {
+    String::Utf8Value arg0(ARGVAR[0]);
+    if (!(ARGVAR[0]->IsNull() || ARGVAR[0]->IsUndefined())) {
         value = *arg0;
     }
     g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
 }
 
-Handle<Value> Rsvg::GetNumberProperty (const char* property, const ARGTYPE& info) {
+v8::Local<v8::Number> Rsvg::GetNumberProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gdouble value = 0;
     g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
     return Nan::New<Number>(value);
 }
 
-void Rsvg::SetNumberProperty (const char* property, const ARGTYPE& info) {
+void Rsvg::SetNumberProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
-    gdouble value = info[0]->NumberValue();
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
+    gdouble value = ARGVAR[0]->NumberValue();
     if (std::isnan(value)) {
         value = 0;
     }
     g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
 }
 
-Handle<Value> Rsvg::GetIntegerProperty (const char* property, const ARGTYPE& info) {
+v8::Local<v8::Integer> Rsvg::GetIntegerProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gint value = 0;
     g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
     return Nan::New<Integer>(value);
 }
 
-void Rsvg::SetIntegerProperty (const char* property, const ARGTYPE& info) {
+void Rsvg::SetIntegerProperty (const char* property, const ARGTYPE& ARGVAR) {
     Nan::HandleScope scope;
-    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(info.This());
-    gint value = info[0]->Int32Value();
+    Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
+    gint value = ARGVAR[0]->Int32Value();
     g_object_set(G_OBJECT(obj->_handle), property, value, NULL);
 }
 
