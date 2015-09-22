@@ -5,6 +5,7 @@
 #include <cairo-pdf.h>
 #include <cairo-svg.h>
 #include <string>
+#include <iostream>
 #include <cmath>
 
 #ifdef _MSC_VER
@@ -28,7 +29,7 @@ Rsvg::~Rsvg() {
     g_object_unref(G_OBJECT(_handle));
 }
 
-void Rsvg::Init(Handle<Object> exports) {
+NAN_MODULE_INIT(Rsvg::Init) {
 
 #if !GLIB_CHECK_VERSION(2, 36, 0)
     // Initialize GObject types.
@@ -58,9 +59,9 @@ void Rsvg::Init(Handle<Object> exports) {
     Nan::SetPrototypeMethod(tpl, "autocrop", Autocrop);
     Nan::SetPrototypeMethod(tpl, "render", Render);
     // Export class.
-    Local<Function> tplFunc = tpl->GetFunction();
+    Local<Function> tplFunc = Nan::GetFunction(tpl).ToLocalChecked();
     constructor.Reset(tplFunc);
-    exports->Set(Nan::New("Rsvg").ToLocalChecked(), tplFunc);
+    Nan::Set(target, Nan::New("Rsvg").ToLocalChecked(), tplFunc);
 }
 
 NAN_METHOD(Rsvg::New) {
@@ -436,7 +437,9 @@ NAN_METHOD(Rsvg::Render) {
     if (renderFormat == RENDER_FORMAT_SVG) {
         image->Set(Nan::New("data").ToLocalChecked(), Nan::New<String>(data.c_str()).ToLocalChecked());
     } else {
-        image->Set(Nan::New("data").ToLocalChecked(), Nan::NewBuffer(const_cast<char*>(data.c_str()), data.length()).ToLocalChecked());
+        char* strbuf = new char[data.length()+1];
+        data.copy(strbuf, data.length());
+        image->Set(Nan::New("data").ToLocalChecked(), Nan::NewBuffer(strbuf, data.length()).ToLocalChecked());
     }
 
     image->Set(Nan::New("format").ToLocalChecked(), RenderFormatToString(renderFormat));
@@ -456,12 +459,13 @@ v8::Local<v8::String> Rsvg::GetStringProperty (const char* property, const ARGTY
     Rsvg* obj = ObjectWrap::Unwrap<Rsvg>(ARGVAR.This());
     gchar* value = NULL;
     g_object_get(G_OBJECT(obj->_handle), property, &value, NULL);
-    v8::Local<String> result = Nan::New<String>(value).ToLocalChecked();
     if (value) {
+        v8::Local<String> result = Nan::New<String>(value).ToLocalChecked();
         g_free(value);
         return result;
     }
-    return Nan::EmptyString(); // TODO: possibly breaking change: returning empty string instead of null!
+     // TODO: possibly breaking change: returning empty string instead of null!
+    return Nan::New<String>("").ToLocalChecked();
 }
 
 void Rsvg::SetStringProperty (const char* property, const ARGTYPE& ARGVAR) {
