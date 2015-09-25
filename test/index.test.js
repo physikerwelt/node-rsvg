@@ -45,8 +45,7 @@ describe('Rsvg', function() {
 			svg.write('<svg width="4" height="6">').should.be.false;
 		});
 
-		it('emits load event when ready', function(done) {
-			// Stream.
+		it('emits load event when ready - from stream', function(done) {
 			var onload = sinon.spy();
 			var svg = new Rsvg();
 			svg.on('load', onload);
@@ -54,10 +53,17 @@ describe('Rsvg', function() {
 			svg.write('</svg>');
 			onload.should.not.have.been.called;
 			svg.end();
-			onload.should.have.been.calledOnce;
-			onload.should.have.been.calledWithExactly();
+			process.nextTick(function() {
+				onload.should.have.been.calledOnce;
+				onload.should.have.been.calledWithExactly();
+				done();
+			});
+		});
 
-			// Constructed with SVG.
+		it('emits load event when ready - from svg', function(done) {
+			var onload = sinon.spy();
+			var svg = new Rsvg();
+			svg.on('load', onload);
 			onload = sinon.spy();
 			svg = new Rsvg('<svg width="2" height="3"></svg>');
 			svg.on('load', onload);

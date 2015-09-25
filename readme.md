@@ -38,6 +38,10 @@ svg.on('finish', function() {
 fs.createReadStream('tiger.svg').pipe(svg);
 ```
 
+## Possible breaking changes
+
+Before v0.6.0 in case of error `getBaseURI` returned `null`.
+Since v0.6.0 possibly breaking change was introduced: now `getBaseURI` method always returns string. In case of error an empty string is returned, so it might affect user code that relies on strict equality to `null`. 
 
 ## Installation
 

@@ -35,7 +35,8 @@
 			"conditions": [
 				[ "OS=='linux'", {
 					"cflags": [
-						"<@(cflags)"
+						"<@(cflags)",
+                                                "-std=c++0x"
 					],
 					"ldflags": [
 						"<@(ldflags)"
