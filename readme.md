@@ -7,7 +7,7 @@
  *  SVG
  *  Raw memory buffer image
 
-[![Build Status](https://travis-ci.org/anru/node-rsvg.png?branch=master)](https://travis-ci.org/anru/node-rsvg)
+[![Build Status](https://travis-ci.org/2gis/node-rsvg.svg?branch=master)](https://travis-ci.org/2gis/node-rsvg)
 
 This repository is fork of https://github.com/walling/node-rsvg and has windows support and don't need to export some variables for successfully building on OSX.
 Also this fork fixes problem with zero-sized buffer rendered in some real rare cases.
