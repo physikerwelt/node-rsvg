@@ -5,7 +5,8 @@ node_js:
   - "0.10"
   - "0.12"
   - "2"
-  - "stable"
+  - "iojs"
+  - "node"
 before_script:
   - sudo apt-get update -qq
   - sudo apt-get install -qq librsvg2-dev
