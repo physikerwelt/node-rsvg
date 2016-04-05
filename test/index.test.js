@@ -3,6 +3,7 @@
 var Writable = require('stream').Writable;
 var sinon = require('sinon');
 var Rsvg = require('..').Rsvg;
+var fs = require('fs');
 
 describe('Rsvg', function() {
 
@@ -229,4 +230,17 @@ describe('Rsvg', function() {
 		});
 	});
 
+	describe('reference rendering', function() {
+		it('png image should match the reference image', function() {
+			var input = fs.readFileSync('./test/svg/smp.svg');
+			var reference = fs.readFileSync('./test/png/smp.png');
+			var svg = new Rsvg(input);
+			var result = new Buffer(svg.render({
+				format: 'png',
+				width: svg.width,
+				height: svg.height
+			}).data);
+			Buffer.compare(reference,result).should.equal(0);
+		});
+	});
 });
