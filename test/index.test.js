@@ -230,17 +230,23 @@ describe('Rsvg', function() {
 		});
 	});
 
-	describe('reference rendering', function() {
-		it('png image should match the reference image', function() {
-			var input = fs.readFileSync('./test/svg/smp.svg');
-			var reference = fs.readFileSync('./test/png/smp.png');
-			var svg = new Rsvg(input);
-			var result = new Buffer(svg.render({
-				format: 'png',
-				width: svg.width,
-				height: svg.height
-			}).data);
-			Buffer.compare(reference,result).should.equal(0);
+	describe('reference rendering', function () {
+		var items = fs.readdirSync('./test/svg/');
+		items.forEach(function (testcase) {
+			if (testcase.slice(-4) === '.svg') {
+				it('png image should match the reference image' + testcase, function () {
+					var fn = testcase.slice(0, -4);
+					var input = fs.readFileSync('./test/svg/' + fn + '.svg');
+					var reference = fs.readFileSync('./test/png/' + fn + '.png');
+					var svg = new Rsvg(input);
+					var result = new Buffer(svg.render({
+						format: 'png',
+						width: svg.width,
+						height: svg.height
+					}).data);
+					Buffer.compare(reference, result).should.equal(0);
+				});
+			}
 		});
 	});
 });

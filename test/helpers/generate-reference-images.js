@@ -25,7 +25,7 @@ function render(name) {
 
 fs.readdir('./test/svg/', function(err, items) {
     for (var i=0; i<items.length; i++) {
-        if(items[i].slice(-4)=='.svg'){
+        if(items[i].slice(-4)==='.svg'){
             var fn = items[i].slice(0,-4);
             render(fn);
         }
