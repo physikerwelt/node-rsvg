@@ -234,7 +234,7 @@ describe('Rsvg', function() {
 		var items = fs.readdirSync('./test/svg/');
 		items.forEach(function (testcase) {
 			if (testcase.slice(-4) === '.svg') {
-				it('png image should match the reference image' + testcase, function () {
+				it('png image should match the reference image "' + testcase + '"', function () {
 					var fn = testcase.slice(0, -4);
 					var input = fs.readFileSync('./test/svg/' + fn + '.svg');
 					var reference = fs.readFileSync('./test/png/' + fn + '.png');
