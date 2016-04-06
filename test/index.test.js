@@ -4,6 +4,7 @@ var Writable = require('stream').Writable;
 var sinon = require('sinon');
 var Rsvg = require('..').Rsvg;
 var fs = require('fs');
+var path = require('path');
 
 describe('Rsvg', function() {
 
@@ -256,14 +257,18 @@ describe('Rsvg', function() {
 						var i = 1;
 						while (fs.existsSync('./test/png/' + fn + '-variant' + i + '.png')){
 							if ( compare(rendering,  fn + '-variant' + i ) === 0){
-								sinon.assert.pass(fn + ' passed using alternative ' + i);
+								sinon.assert.pass(fn + ' passed using variant ' + i);
 								return;
 							}
 							i++;
 						}
 					}
 					var base64 = 'data:image/png;base64,' + rendering.toString('base64');
-					sinon.assert.fail('image does not match reference:\n' + base64);
+					sinon.assert.fail('Image does not match reference!\n' +
+						'To view the image convert the base64 encoded string to an actual image.\n' +
+						'You can use for example http://www.askapache.com/online-tools/base64-image-converter \n'+
+						'If you think the rendering result looks good save it as\n' +
+						path.resolve('./test/png') + '/' + fn + '-variant' + i + '.png\n'+ base64);
 				});
 			}
 		});
