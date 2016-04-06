@@ -262,8 +262,8 @@ describe('Rsvg', function() {
 							i++;
 						}
 					}
-					
-					sinon.assert.fail('image does not match reference:\n' + JSON.stringify(rendering));
+					var base64 = 'data:image/png;base64,' + rendering.toString('base64');
+					sinon.assert.fail('image does not match reference:\n' + base64);
 				});
 			}
 		});
