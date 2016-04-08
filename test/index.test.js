@@ -248,7 +248,16 @@ describe('Rsvg', function() {
 
 					var compare = function (rendering, referenceFn) {
 						var reference = fs.readFileSync('./test/png/' + referenceFn + '.png');
-						return Buffer.compare(reference, rendering);
+						try{
+							return Buffer.compare(reference, rendering);
+						} catch (e){
+							// TODO: Remove workaround after support for node 0.10 was dropped
+							if ( JSON.stringify(reference) === JSON.stringify(rendering) ) {
+								return 0;
+							} else {
+								return -1;
+							}
+						}
 					};
 					
 					if( compare(rendering, fn) === 0 ){
