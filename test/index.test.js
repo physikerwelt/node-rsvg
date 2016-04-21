@@ -3,6 +3,8 @@
 var Writable = require('stream').Writable;
 var sinon = require('sinon');
 var Rsvg = require('..').Rsvg;
+var fs = require('fs');
+var path = require('path');
 
 describe('Rsvg', function() {
 
@@ -229,4 +231,57 @@ describe('Rsvg', function() {
 		});
 	});
 
+	describe('reference rendering', function () {
+		var items = fs.readdirSync('./test/svg/');
+		// sinon.assert.pass = function (message) {  console.log(message); };
+		items.forEach(function (testcase) {
+			if (testcase.slice(-4) === '.svg') {
+				it('png image should match the reference image "' + testcase + '"', function () {
+					var fn = testcase.slice(0, -4);
+					var input = fs.readFileSync('./test/svg/' + fn + '.svg');
+					var svg = new Rsvg(input);
+					var rendering = new Buffer(svg.render({
+						format: 'png',
+						width: svg.width,
+						height: svg.height
+					}).data);
+
+					var compare = function (rendering, referenceFn) {
+						var reference = fs.readFileSync('./test/png/' + referenceFn + '.png');
+						try{
+							return Buffer.compare(reference, rendering);
+						} catch (e){
+							// TODO: Remove workaround after support for node 0.10 was dropped
+							if ( JSON.stringify(reference) === JSON.stringify(rendering) ) {
+								return 0;
+							} else {
+								return -1;
+							}
+						}
+					};
+					
+					if( compare(rendering, fn) === 0 ){
+						return;
+					} else {
+						var i = 1;
+						while (fs.existsSync('./test/png/' + fn + '-variant' + i + '.png')){
+							if ( compare(rendering,  fn + '-variant' + i ) === 0){
+								sinon.assert.pass(fn + ' passed using variant ' + i);
+								return;
+							}
+							i++;
+						}
+					}
+					var base64 = 'data:image/png;base64,' + rendering.toString('base64');
+					sinon.assert.fail('Image does not match reference!\n' +
+						'To view the image convert the base64 encoded string to an actual image.\n' +
+						'You can use a online decoder like' +
+						' http://www.askapache.com/online-tools/base64-image-converter\n' +
+						'un-check "Compress Image (png and jpeg)" to get a result that can be used as reference.\n' +
+						'If you think the rendering result looks good save it as\n' +
+						path.resolve('./test/png') + '/' + fn + '-variant' + i + '.png\n'+ base64);
+				});
+			}
+		});
+	});
 });
