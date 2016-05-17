@@ -6,3 +6,4 @@ npm-debug.log
 .npmrc
 *.DS_Store
 *._t_
+*.iml

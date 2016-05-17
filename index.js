@@ -267,6 +267,11 @@ Rsvg.prototype.render = function(options) {
 
 	options = options || {};
 
+	if (options.width===0||options.height===0){
+		options.data = [];
+		return options;
+		//throw new Error('Image to small');
+	}
 	var img = this.handle.render(
 		options.width,
 		options.height,
