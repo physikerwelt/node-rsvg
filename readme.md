@@ -45,6 +45,8 @@ Since v0.6.0 possibly breaking change was introduced: now `getBaseURI` method al
 
 ## Installation
 
+**Node 6** is currently not supported.
+
 First install the LibRSVG library and header files. Usually you have to look for a *development* package version. You must also have a functioning build tool chain including `pkg-config`. You can find instructions for different operating systems below. After that, you simply run:
 
 ```bash
