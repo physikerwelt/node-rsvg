@@ -6,6 +6,8 @@ node_js:
   - "0.12"
   - "2"
   - "iojs"
+  - "4"
+  - "5"
   - "node"
 before_script:
   - sudo apt-get update -qq
